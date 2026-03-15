@@ -5,10 +5,13 @@ export default function Login(){
 
   const [rollNumber,setRollNumber] = useState("");
   const [password,setPassword] = useState("");
+  const [loading,setLoading] = useState(false);
 
   const login = async ()=>{
 
     try{
+
+      setLoading(true);
 
       const res = await api.post("/auth/login",{
         rollNumber,
@@ -22,6 +25,10 @@ export default function Login(){
     }catch(err){
 
       alert(err.response?.data?.message || "Login Failed");
+
+    }finally{
+
+      setLoading(false);
 
     }
 
@@ -52,9 +59,10 @@ export default function Login(){
 
         <button
           onClick={login}
+          disabled={loading}
           className="bg-blue-500 text-white w-full p-2 rounded"
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
 
       </div>

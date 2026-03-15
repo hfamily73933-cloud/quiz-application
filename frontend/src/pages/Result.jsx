@@ -7,6 +7,7 @@ export default function Result(){
   const {quizId} = useParams();
 
   const [result,setResult] = useState(null);
+  const [loading,setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -60,8 +61,6 @@ export default function Result(){
           Your Score: <span className="font-bold">{result.score}</span>
         </p>
 
-        {/* RESULT ANALYTICS */}
-
         <div className="grid grid-cols-2 gap-3 text-sm mb-4">
 
           <div className="bg-gray-100 p-3 rounded">
@@ -87,17 +86,23 @@ export default function Result(){
         </div>
 
         <button
-          onClick={()=>navigate("/home")}
+          onClick={()=>{
+            setLoading(true)
+            navigate("/home")
+          }}
           className="mt-2 bg-green-500 text-white p-2 rounded w-full"
         >
-          Back to Home
+          {loading ? "Loading..." : "Back to Home"}
         </button>
 
         <button
-          onClick={()=>navigate(`/leaderboard/${quizId}`)}
+          onClick={()=>{
+            setLoading(true)
+            navigate(`/leaderboard/${quizId}`)
+          }}
           className="mt-2 bg-blue-500 text-white p-2 rounded w-full"
         >
-          View Leaderboard
+          {loading ? "Loading..." : "View Leaderboard"}
         </button>
 
       </div>

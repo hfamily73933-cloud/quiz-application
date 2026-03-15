@@ -7,6 +7,7 @@ export default function Leaderboard(){
   const {quizId} = useParams();
 
   const [leaders,setLeaders] = useState([]);
+  const [loading,setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -72,10 +73,13 @@ export default function Leaderboard(){
         ))}
 
         <button
-          onClick={()=>navigate("/home")}
+          onClick={()=>{
+            setLoading(true)
+            navigate("/home")
+          }}
           className="mt-4 bg-green-500 text-white w-full p-2 rounded"
         >
-          Back to Home
+          {loading ? "Loading..." : "Back to Home"}
         </button>
 
       </div>
