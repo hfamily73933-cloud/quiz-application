@@ -19,18 +19,24 @@ export default function Home(){
 
         const profileRes = await api.get("/auth/profile");
 
+        const roll = profileRes.data.rollNumber;
+
         setProfile(profileRes.data);
+
+        const submitted = localStorage.getItem(`quizSubmitted_${roll}`);
 
         const attemptRes = await api.get("/quiz/check-attempt");
 
-        setAttempted(attemptRes.data.attempted);
+        if(submitted === "true"){
+          setAttempted(true);
+        }else{
+          setAttempted(attemptRes.data.attempted);
+        }
 
         setQuizId(attemptRes.data.quizId);
 
       }catch(err){
-
         console.log(err);
-
       }
 
     };
@@ -61,7 +67,6 @@ export default function Home(){
       >
         {attempted ? "Quiz Already Submitted" : "Start Quiz"}
       </button>
-
 
       <div className="grid grid-cols-2 gap-3 mt-4">
 

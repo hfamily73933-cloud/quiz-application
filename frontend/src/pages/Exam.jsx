@@ -10,8 +10,36 @@ export default function Exam(){
   const [quizId,setQuizId] = useState("");
   const [duration,setDuration] = useState(600);
   const [selected,setSelected] = useState({});
+  const [roll,setRoll] = useState("");
 
   const navigate = useNavigate();
+
+
+  /* GET USER PROFILE */
+
+  useEffect(()=>{
+
+    const loadProfile = async()=>{
+
+      const res = await api.get("/auth/profile");
+
+      const rollNumber = res.data.rollNumber;
+
+      setRoll(rollNumber);
+
+      const submitted = localStorage.getItem(`quizSubmitted_${rollNumber}`);
+
+      if(submitted === "true"){
+        navigate("/home");
+      }
+
+    };
+
+    loadProfile();
+
+  },[]);
+
+
 
   /* LOAD QUESTIONS */
 
@@ -32,15 +60,18 @@ export default function Exam(){
   },[]);
 
 
-  /* HANDLE BACK BUTTON DURING EXAM */
+
+  /* HANDLE BACK BUTTON */
 
   useEffect(()=>{
 
     window.history.pushState(null,null,window.location.href);
 
-    const handleBack = async () => {
+    const handleBack = async()=>{
 
       if(quizId){
+
+        localStorage.setItem(`quizSubmitted_${roll}`,"true");
 
         await api.post("/quiz/submit",{quizId});
 
@@ -54,7 +85,8 @@ export default function Exam(){
 
     return ()=>window.removeEventListener("popstate",handleBack);
 
-  },[quizId]);
+  },[quizId,roll]);
+
 
 
   /* TAB SWITCH DETECTION */
@@ -64,6 +96,8 @@ export default function Exam(){
     const handler = async()=>{
 
       if(document.hidden){
+
+        localStorage.setItem(`quizSubmitted_${roll}`,"true");
 
         await api.post("/quiz/submit",{quizId});
 
@@ -77,7 +111,8 @@ export default function Exam(){
 
     return ()=>document.removeEventListener("visibilitychange",handler);
 
-  },[quizId]);
+  },[quizId,roll]);
+
 
 
   /* SAVE ANSWER */
@@ -102,34 +137,35 @@ export default function Exam(){
   };
 
 
+
   /* NAVIGATION */
 
   const nextQuestion = ()=>{
-
     if(index < questions.length-1){
       setIndex(index+1);
     }
-
   };
 
   const prevQuestion = ()=>{
-
     if(index > 0){
       setIndex(index-1);
     }
-
   };
+
 
 
   /* SUBMIT QUIZ */
 
   const submitQuiz = async()=>{
 
+    localStorage.setItem(`quizSubmitted_${roll}`,"true");
+
     await api.post("/quiz/submit",{quizId});
 
     navigate(`/result/${quizId}`);
 
   };
+
 
 
   if(questions.length===0){
@@ -147,9 +183,7 @@ export default function Exam(){
       <div className="bg-white shadow p-4 rounded">
 
         <h2 className="font-semibold mb-4">
-
           {index+1}. {question.question}
-
         </h2>
 
         {question.options.map(opt => {
@@ -176,7 +210,6 @@ export default function Exam(){
 
       </div>
 
-
       <div className="flex gap-3 mt-4">
 
         <button
@@ -190,7 +223,6 @@ export default function Exam(){
         >
           Prev
         </button>
-
 
         {index === questions.length-1 ? (
 

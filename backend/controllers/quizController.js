@@ -161,7 +161,8 @@ const checkAttempt = async (req, res) => {
       quizId: quiz._id
     });
 
-    if (submission && submission.score !== undefined) {
+    // FIX: if submission exists → user already attempted
+    if (submission) {
       return res.json({ attempted: true, quizId: quiz._id });
     }
 
