@@ -41,21 +41,35 @@ export default function Exam(){
 
 
 
-  /* LOAD QUESTIONS */
+  /* LOAD QUESTIONS (USE PRELOADED DATA IF AVAILABLE) */
 
   useEffect(()=>{
 
-    const loadQuestions = async()=>{
+    const cached = sessionStorage.getItem("quizData");
 
-      const res = await api.get("/quiz/questions");
+    if(cached){
 
-      setQuestions(res.data.questions);
-      setQuizId(res.data.quizId);
-      setDuration(res.data.duration * 60);
+      const data = JSON.parse(cached);
 
-    };
+      setQuestions(data.questions);
+      setQuizId(data.quizId);
+      setDuration(data.duration * 60);
 
-    loadQuestions();
+    }else{
+
+      const loadQuestions = async()=>{
+
+        const res = await api.get("/quiz/questions");
+
+        setQuestions(res.data.questions);
+        setQuizId(res.data.quizId);
+        setDuration(res.data.duration * 60);
+
+      };
+
+      loadQuestions();
+
+    }
 
   },[]);
 
@@ -138,8 +152,6 @@ export default function Exam(){
 
 
 
-  /* NAVIGATION */
-
   const nextQuestion = ()=>{
     if(index < questions.length-1){
       setIndex(index+1);
@@ -153,8 +165,6 @@ export default function Exam(){
   };
 
 
-
-  /* SUBMIT QUIZ */
 
   const submitQuiz = async()=>{
 

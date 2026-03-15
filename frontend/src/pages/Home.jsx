@@ -35,6 +35,19 @@ export default function Home(){
 
         setQuizId(attemptRes.data.quizId);
 
+        /* PRELOAD QUIZ QUESTIONS */
+
+        if(!attemptRes.data.attempted){
+
+          const quizRes = await api.get("/quiz/questions");
+
+          sessionStorage.setItem(
+            "quizData",
+            JSON.stringify(quizRes.data)
+          );
+
+        }
+
       }catch(err){
         console.log(err);
       }
