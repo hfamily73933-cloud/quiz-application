@@ -17,8 +17,6 @@ export default function Home(){
 
       try{
 
-        /* NEW DASHBOARD API (REPLACES 2 CALLS) */
-
         const dash = await api.get("/dashboard");
 
         const roll = dash.data.profile.rollNumber;
@@ -34,8 +32,6 @@ export default function Home(){
         }
 
         setQuizId(dash.data.quizId);
-
-        /* PRELOAD QUIZ QUESTIONS */
 
         if(!dash.data.attempted){
 
@@ -57,6 +53,29 @@ export default function Home(){
     loadData();
 
   },[]);
+
+
+
+  /* LOGOUT FUNCTION */
+
+  const logout = async()=>{
+
+    try{
+
+      await api.post("/auth/logout");
+
+      localStorage.removeItem("token");
+
+      navigate("/");
+
+    }catch(err){
+
+      console.log(err);
+
+    }
+
+  };
+
 
 
   if(!profile){
@@ -98,6 +117,16 @@ export default function Home(){
         </button>
 
       </div>
+
+
+      {/* LOGOUT BUTTON */}
+
+      <button
+        onClick={logout}
+        className="mt-6 bg-red-500 text-white w-full p-3 rounded"
+      >
+        Logout
+      </button>
 
     </div>
 

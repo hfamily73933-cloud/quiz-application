@@ -17,4 +17,6 @@ router.get("/leaderboard/:quizId", authMiddleware, quizController.getLeaderboard
 
 router.get("/check-attempt", authMiddleware, quizController.checkAttempt);
 
+router.get("/response-sheet/:quizId", authMiddleware, quizController.downloadResponseSheet);
+
 module.exports = router;

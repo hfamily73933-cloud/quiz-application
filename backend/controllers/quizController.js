@@ -2,6 +2,7 @@ const Quiz = require("../models/Quiz");
 const Question = require("../models/Question");
 const Submission = require("../models/Submission");
 const shuffle = require("../utils/shuffle");
+const PDFDocument = require("pdfkit");
 
 
 /* GET QUESTIONS */
@@ -262,6 +263,111 @@ const getLeaderboard = async (req, res) => {
 };
 
 
+/* DOWNLOAD RESPONSE SHEET (PDF WITH OPTION TEXT) */
+
+const downloadResponseSheet = async (req,res)=>{
+
+  try{
+
+    const {quizId} = req.params;
+
+    const submission = await Submission.findOne({
+      userId:req.user.id,
+      quizId
+    }).populate("userId","name rollNumber");
+
+    if(!submission){
+      return res.status(404).json({message:"Submission not found"});
+    }
+
+    const questions = await Question.find({quizId});
+
+    const doc = new PDFDocument();
+
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=response-sheet.pdf"
+    );
+
+    res.setHeader("Content-Type","application/pdf");
+
+    doc.pipe(res);
+
+    /* TITLE */
+
+    doc.fontSize(20).text("QUIZ RESPONSE SHEET",{align:"center"});
+    doc.moveDown();
+
+    doc.fontSize(12).text(`Name: ${submission.userId.name}`);
+    doc.text(`Roll Number: ${submission.userId.rollNumber}`);
+    doc.moveDown();
+
+    doc.text("----------------------------------------");
+    doc.moveDown();
+
+    questions.forEach((question,index)=>{
+
+      const answer = submission.answers.find(
+        a => a.questionId === question._id.toString()
+      );
+
+      let selectedText = "Not Attempted";
+      let correctText = "";
+      let status = "Not Attempted";
+
+      /* find correct option text */
+
+      const correctOption = question.options.find(
+        opt => opt.id === question.correctOptionId
+      );
+
+      if(correctOption){
+        correctText = correctOption.text;
+      }
+
+      /* find selected option text */
+
+      if(answer){
+
+        const selectedOption = question.options.find(
+          opt => opt.id === answer.selectedOptionId
+        );
+
+        if(selectedOption){
+          selectedText = selectedOption.text;
+        }
+
+        if(answer.selectedOptionId === question.correctOptionId){
+          status = "Correct";
+        }else{
+          status = "Incorrect";
+        }
+
+      }
+
+      doc.fontSize(12).text(`Q${index+1}: ${question.question}`);
+      doc.moveDown(0.5);
+
+      doc.text(`Correct Option: ${correctText}`);
+      doc.text(`Selected Option: ${selectedText}`);
+      doc.text(`Status: ${status}`);
+
+      doc.moveDown();
+      doc.text("----------------------------------------");
+      doc.moveDown();
+
+    });
+
+    doc.end();
+
+  }catch(error){
+
+    res.status(500).json({message:error.message});
+
+  }
+
+};
+
 
 module.exports = {
   getQuestions,
@@ -269,5 +375,6 @@ module.exports = {
   submitQuiz,
   getResult,
   getLeaderboard,
-  checkAttempt
+  checkAttempt,
+  downloadResponseSheet
 };

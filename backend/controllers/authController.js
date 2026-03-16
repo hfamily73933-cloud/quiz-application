@@ -53,6 +53,8 @@ const loginUser = async(req,res)=>{
 
 };
 
+
+
 const getProfile = async(req,res)=>{
 
   const user = await User.findById(req.user.id).select("-password");
@@ -61,7 +63,37 @@ const getProfile = async(req,res)=>{
 
 };
 
+
+
+/* NEW LOGOUT FUNCTION */
+
+const logoutUser = async(req,res)=>{
+
+  try{
+
+    const user = await User.findById(req.user.id);
+
+    if(user){
+
+      user.isLoggedIn = false;
+
+      await user.save();
+
+    }
+
+    res.json({message:"Logged out successfully"});
+
+  }catch(error){
+
+    res.status(500).json({message:error.message});
+
+  }
+
+};
+
+
 module.exports={
   loginUser,
-  getProfile
+  getProfile,
+  logoutUser
 };

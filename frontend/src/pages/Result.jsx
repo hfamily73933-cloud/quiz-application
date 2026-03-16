@@ -11,6 +11,35 @@ export default function Result(){
 
   const navigate = useNavigate();
 
+
+const downloadSheet = async()=>{
+
+  try{
+
+    const res = await api.get(
+      `/quiz/response-sheet/${quizId}`,
+      { responseType:"blob" }
+    );
+
+    const url = window.URL.createObjectURL(new Blob([res.data]));
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.setAttribute("download","response-sheet.pdf");
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+  }catch(err){
+    console.log(err);
+  }
+
+};
+
   useEffect(()=>{
 
     const loadResult = async()=>{
@@ -84,6 +113,13 @@ export default function Result(){
           </div>
 
         </div>
+
+        <button
+  onClick={downloadSheet}
+  className="mt-2 bg-purple-500 text-white p-2 rounded w-full"
+>
+  Download Response Sheet
+</button>
 
         <button
           onClick={()=>{
