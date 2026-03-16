@@ -11,6 +11,8 @@ export default function Exam(){
   const [duration,setDuration] = useState(600);
   const [selected,setSelected] = useState({});
   const [roll,setRoll] = useState("");
+  const [submitting,setSubmitting] = useState(false);
+  const [showConfirm,setShowConfirm] = useState(false);
 
   const navigate = useNavigate();
 
@@ -41,7 +43,7 @@ export default function Exam(){
 
 
 
-  /* LOAD QUESTIONS (USE PRELOADED DATA IF AVAILABLE) */
+  /* LOAD QUESTIONS */
 
   useEffect(()=>{
 
@@ -166,7 +168,11 @@ export default function Exam(){
 
 
 
+  /* FINAL SUBMIT */
+
   const submitQuiz = async()=>{
+
+    setSubmitting(true);
 
     localStorage.setItem(`quizSubmitted_${roll}`,"true");
 
@@ -220,6 +226,7 @@ export default function Exam(){
 
       </div>
 
+
       <div className="flex gap-3 mt-4">
 
         <button
@@ -237,10 +244,11 @@ export default function Exam(){
         {index === questions.length-1 ? (
 
           <button
-            onClick={submitQuiz}
+            disabled={submitting}
+            onClick={()=>setShowConfirm(true)}
             className="bg-red-500 text-white w-full p-2 rounded"
           >
-            Submit
+            {submitting ? "Submitting..." : "Submit"}
           </button>
 
         ) : (
@@ -255,6 +263,47 @@ export default function Exam(){
         )}
 
       </div>
+
+
+      {/* CONFIRMATION MODAL */}
+
+      {showConfirm && (
+
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+
+          <div className="bg-white rounded-lg p-6 w-80 text-center shadow-lg">
+
+            <h3 className="text-lg font-semibold mb-4">
+              Submit Quiz?
+            </h3>
+
+            <p className="text-sm mb-6">
+              Are you sure you want to submit your answers?
+            </p>
+
+            <div className="flex gap-3">
+
+              <button
+                onClick={()=>setShowConfirm(false)}
+                className="bg-gray-400 text-white w-full p-2 rounded"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={submitQuiz}
+                className="bg-red-500 text-white w-full p-2 rounded"
+              >
+                Yes Submit
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
 
     </div>
 

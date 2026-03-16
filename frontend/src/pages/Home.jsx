@@ -17,27 +17,27 @@ export default function Home(){
 
       try{
 
-        const profileRes = await api.get("/auth/profile");
+        /* NEW DASHBOARD API (REPLACES 2 CALLS) */
 
-        const roll = profileRes.data.rollNumber;
+        const dash = await api.get("/dashboard");
 
-        setProfile(profileRes.data);
+        const roll = dash.data.profile.rollNumber;
+
+        setProfile(dash.data.profile);
 
         const submitted = localStorage.getItem(`quizSubmitted_${roll}`);
-
-        const attemptRes = await api.get("/quiz/check-attempt");
 
         if(submitted === "true"){
           setAttempted(true);
         }else{
-          setAttempted(attemptRes.data.attempted);
+          setAttempted(dash.data.attempted);
         }
 
-        setQuizId(attemptRes.data.quizId);
+        setQuizId(dash.data.quizId);
 
         /* PRELOAD QUIZ QUESTIONS */
 
-        if(!attemptRes.data.attempted){
+        if(!dash.data.attempted){
 
           const quizRes = await api.get("/quiz/questions");
 

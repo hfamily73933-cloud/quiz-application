@@ -8,6 +8,7 @@ const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/authRoutes");
 const quizRoutes = require("./routes/quizRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const socketHandler = require("./sockets/socketHandler");
 
@@ -30,6 +31,7 @@ app.use(express.json());
 
 app.use("/api/auth",authRoutes);
 app.use("/api/quiz",quizRoutes);
+app.use("/api/dashboard",dashboardRoutes);
 
 const PORT = process.env.PORT || 5000;
 
