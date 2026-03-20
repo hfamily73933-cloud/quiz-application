@@ -8,6 +8,7 @@ export default function Result(){
 
   const [result,setResult] = useState(null);
   const [loading,setLoading] = useState(false);
+  const [error,setError] = useState("");
 
   const navigate = useNavigate();
 
@@ -43,12 +44,17 @@ const downloadSheet = async()=>{
   useEffect(()=>{
 
     const loadResult = async()=>{
-
-      const res = await api.get(`/quiz/result/${quizId}`);
-
-      setResult(res.data);
-
-    };
+  try{
+    const res = await api.get(`/quiz/result/${quizId}`);
+    setResult(res.data);
+  }catch(err){
+    if(err.response?.status === 404){
+      setError("Please attempt the test");
+    }else{
+      setError("Something went wrong");
+    }
+  }
+};
 
     loadResult();
 
@@ -72,9 +78,26 @@ const downloadSheet = async()=>{
   },[]);
 
 
-  if(!result){
-    return <p className="text-center mt-10">Loading result...</p>
-  }
+  if(error){
+  return (
+    <div className="text-center mt-10">
+      <p className="text-red-500 mb-4">
+        {error}
+      </p>
+
+      <button
+        onClick={()=>navigate("/home")}
+        className="bg-green-500 text-white px-4 py-2 rounded"
+      >
+        Go to Home
+      </button>
+    </div>
+  );
+}
+
+if(!result){
+  return <p className="text-center mt-10">Loading result...</p>
+}
 
   return(
 

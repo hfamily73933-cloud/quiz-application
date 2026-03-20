@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import Timer from "../components/Timer";
 
 export default function Exam(){
+  
 
   const [questions,setQuestions] = useState([]);
   const [index,setIndex] = useState(0);
@@ -13,6 +15,8 @@ export default function Exam(){
   const [roll,setRoll] = useState("");
   const [submitting,setSubmitting] = useState(false);
   const [showConfirm,setShowConfirm] = useState(false);
+
+  const saveTimeout = useRef(null);
 
   const navigate = useNavigate();
 
@@ -29,11 +33,7 @@ export default function Exam(){
 
       setRoll(rollNumber);
 
-      const submitted = localStorage.getItem(`quizSubmitted_${rollNumber}`);
-
-      if(submitted === "true"){
-        navigate("/home");
-      }
+      
 
     };
 
@@ -87,7 +87,7 @@ export default function Exam(){
 
       if(quizId){
 
-        localStorage.setItem(`quizSubmitted_${roll}`,"true");
+        
 
         await api.post("/quiz/submit",{quizId});
 
@@ -110,18 +110,17 @@ export default function Exam(){
   useEffect(()=>{
 
     const handler = async()=>{
+  if(document.hidden && quizId){
 
-      if(document.hidden){
+    try{
+      await api.post("/quiz/submit",{quizId});
+    }catch(err){
+      // ✅ ignore (already submitted OR no answers)
+    }
 
-        localStorage.setItem(`quizSubmitted_${roll}`,"true");
-
-        await api.post("/quiz/submit",{quizId});
-
-        navigate("/home");
-
-      }
-
-    };
+    navigate("/home");
+  }
+};
 
     document.addEventListener("visibilitychange",handler);
 
@@ -132,23 +131,30 @@ export default function Exam(){
 
 
   /* SAVE ANSWER */
-
-  const selectOption = async(optionId)=>{
+  
+  const selectOption = (optionId)=>{
+    if (!quizId) return;
 
     const question = questions[index];
 
-    setSelected({
-      ...selected,
-      [question._id]:optionId
-    });
+    setSelected(prev => ({
+  ...prev,
+  [question._id]:optionId
+}));
 
+    if(saveTimeout.current) clearTimeout(saveTimeout.current);
+
+saveTimeout.current = setTimeout(async()=>{
+  try{
     await api.post("/quiz/save-answer",{
-
       quizId,
       questionId:question._id,
       selectedOptionId:optionId
-
     });
+  }catch(err){
+    console.log("Save failed");
+  }
+}, 400);
 
   };
 
@@ -171,24 +177,52 @@ export default function Exam(){
   /* FINAL SUBMIT */
 
   const submitQuiz = async()=>{
+  if(submitting) return; // ✅ check first
 
-    setSubmitting(true);
+  setSubmitting(true);
 
-    localStorage.setItem(`quizSubmitted_${roll}`,"true");
-
+  try{
     await api.post("/quiz/submit",{quizId});
-
     navigate(`/result/${quizId}`);
+  }catch(err){
+    console.log("Submit failed");
+  }
+};
 
+/* CLEANUP TIMER */
+useEffect(() => {
+  return () => {
+    if (saveTimeout.current) {
+      clearTimeout(saveTimeout.current);
+    }
+  };
+}, []);
+
+
+// ✅ ADD THIS EXACTLY HERE (NEW BLOCK)
+useEffect(() => {
+  const handleUnload = () => {
+    if (!quizId) return;
+
+    navigator.sendBeacon(
+      `${import.meta.env.VITE_API_URL}/quiz/submit`,
+      JSON.stringify({ quizId })
+    );
   };
 
+  window.addEventListener("beforeunload", handleUnload);
 
+  return () => {
+    window.removeEventListener("beforeunload", handleUnload);
+  };
+}, [quizId]);
 
   if(questions.length===0){
     return <p className="text-center mt-10">Loading Questions...</p>
   }
 
   const question = questions[index];
+
 
   return(
 

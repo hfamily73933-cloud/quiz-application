@@ -7,32 +7,49 @@ export default function Login(){
   const [password,setPassword] = useState("");
   const [loading,setLoading] = useState(false);
 
+  const [role,setRole] = useState("student");
+
   const login = async ()=>{
 
-    try{
+  try{
 
-      setLoading(true);
+    setLoading(true);
 
-      const res = await api.post("/auth/login",{
+    let res;
+
+    if(role === "student"){
+
+      res = await api.post("/auth/login",{
         rollNumber,
         password
       });
 
       localStorage.setItem("token",res.data.token);
-
       window.location.href="/home";
 
-    }catch(err){
+    }else{
 
-      alert(err.response?.data?.message || "Login Failed");
+      res = await api.post("/admin/login",{
+        email: rollNumber,
+        password
+      });
 
-    }finally{
-
-      setLoading(false);
+      localStorage.setItem("adminToken",res.data.token);
+      window.location.href="/admin/home";
 
     }
 
-  };
+  }catch(err){
+
+    alert(err.response?.data?.message || "Login Failed");
+
+  }finally{
+
+    setLoading(false);
+
+  }
+
+};
 
   return(
 
@@ -45,10 +62,19 @@ export default function Login(){
         </h2>
 
         <input
-          placeholder="Roll Number"
+          placeholder={role === "admin" ? "Email" : "Roll Number"}
           className="border p-2 w-full mb-3"
           onChange={(e)=>setRollNumber(e.target.value)}
         />
+
+        <select
+  className="border p-2 w-full mb-3"
+  value={role}
+  onChange={(e)=>setRole(e.target.value)}
+>
+  <option value="student">Student</option>
+  <option value="admin">Admin</option>
+</select>
 
         <input
           type="password"

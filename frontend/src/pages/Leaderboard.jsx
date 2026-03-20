@@ -7,23 +7,45 @@ export default function Leaderboard(){
   const {quizId} = useParams();
 
   const [leaders,setLeaders] = useState([]);
-  const [loading,setLoading] = useState(false);
+  const [currentUserId,setCurrentUserId] = useState(null);
+  const [loading,setLoading] = useState(true);
+  const [yourRank,setYourRank] = useState(null);
+  const [total,setTotal] = useState(0);
 
   const navigate = useNavigate();
 
-  useEffect(()=>{
+ useEffect(()=>{
 
-    const loadLeaderboard = async()=>{
+  const loadData = async()=>{
+    try{
+      const [leaderRes, profileRes] = await Promise.all([
+        api.get(`/quiz/leaderboard/${quizId}`),
+        api.get("/auth/profile")
+      ]);
 
-      const res = await api.get(`/quiz/leaderboard/${quizId}`);
+      setLeaders(leaderRes.data.leaderboard);
+      setYourRank(leaderRes.data.yourRank);
+      setTotal(leaderRes.data.totalUsers);
 
-      setLeaders(res.data);
+      setCurrentUserId(profileRes.data._id);
 
-    };
+    }catch(err){
+      console.log(err);
+    }finally{
+      setLoading(false); // ✅ VERY IMPORTANT
+    }
+  };
 
-    loadLeaderboard();
+  loadData();
 
-  },[]);
+},[]);
+
+
+  const formatTime = (seconds)=>{
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}m ${s}s`;
+};
 
 
   /* PREVENT BACK TO EXAM */
@@ -42,6 +64,13 @@ export default function Leaderboard(){
 
   },[]);
 
+  if(loading){
+  return (
+    <p className="text-center mt-10">
+      Loading leaderboard...
+    </p>
+  );
+}
 
   return(
 
@@ -49,38 +78,68 @@ export default function Leaderboard(){
 
       <div className="bg-white shadow rounded p-4">
 
-        <h2 className="text-xl font-bold mb-4 text-center">
-          Leaderboard
-        </h2>
+  {/* TOP BAR */}
+  <div className="flex justify-between items-center mb-4">
+    
+    <button
+      onClick={()=>{
+        setLoading(true)
+        navigate("/home")
+      }}
+      className="bg-green-500 text-white px-3 py-1 rounded text-sm"
+    >
+      ← Home
+    </button>
+
+    <h2 className="text-xl font-bold text-center flex-1">
+      Leaderboard
+    </h2>
+
+    {/* empty space for alignment */}
+    <div className="w-16"></div>
+
+  </div>
+
+        {yourRank !== null && (
+  <div className="text-center mb-3 font-semibold text-blue-600">
+    You are ranked #{yourRank} out of {total}
+  </div>
+)}
 
         {leaders.map((user,index)=>(
 
           <div
-            key={index}
-            className="flex justify-between border-b py-2"
+            key={user.userId?._id || user.rank}
+            className={`flex justify-between border-b py-2 ${
+  user.userId?._id === currentUserId
+    ? "bg-blue-100 border-l-4 border-blue-500"
+    : ""
+} ${
+  index === 0 ? "text-yellow-500 font-bold" :
+  index === 1 ? "text-gray-500 font-semibold" :
+  index === 2 ? "text-orange-500 font-semibold" : ""
+}`}
           >
 
-            <span>
-              {index+1}. {user.userId.name}
-            </span>
+            <span className="font-medium">
+  #{user.rank} {user.userId?.name || "Unknown User"}
+{user.userId?._id === currentUserId && (
+  <span className="ml-2 text-blue-600 text-sm">(You)</span>
+)}
+</span>
 
-            <span>
-              {user.score}
-            </span>
+            <span className="text-right">
+  <div>{user.score}</div>
+  <div className="text-xs text-gray-500">
+    {user.timeTaken === 99999999
+  ? "-"
+  : formatTime(user.timeTaken)}
+  </div>
+</span>
 
           </div>
 
         ))}
-
-        <button
-          onClick={()=>{
-            setLoading(true)
-            navigate("/home")
-          }}
-          className="mt-4 bg-green-500 text-white w-full p-2 rounded"
-        >
-          {loading ? "Loading..." : "Back to Home"}
-        </button>
 
       </div>
 

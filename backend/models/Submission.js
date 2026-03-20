@@ -26,9 +26,16 @@ const submissionSchema = new mongoose.Schema({
 
   submittedAt: {
     type: Date,
-    default: Date.now
-  }
+    default: null
+  },
+
+  startedAt:{
+  type:Date,
+  default:null
+}
 
 });
+
+submissionSchema.index({ userId: 1, quizId: 1 });
 
 module.exports = mongoose.model("Submission", submissionSchema);

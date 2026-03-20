@@ -16,8 +16,26 @@ const userSchema = new mongoose.Schema({
   isLoggedIn:{
     type:Boolean,
     default:false
+  },
+
+  // ✅ NEW FIELDS
+  hasAttempted:{
+    type:Boolean,
+    default:false
+  },
+
+  submittedAt:{
+    type:Date,
+    default:null
+  },
+
+    // ✅ NEW
+  role:{
+    type:String,
+    default:"student"
   }
 
 });
+
 
 module.exports = mongoose.model("User",userSchema);

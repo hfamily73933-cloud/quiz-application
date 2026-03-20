@@ -21,7 +21,9 @@ const seedUsers = async () => {
       name: `Student ${i}`,
       rollNumber: `ROLL${i}`,
       department: "CSE",
-      password: hashedPassword
+      password: hashedPassword,
+      hasAttempted:false,
+      submittedAt:null
     });
 
   }

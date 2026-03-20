@@ -7,29 +7,23 @@ const getDashboard = async (req,res)=>{
   try{
 
     const user = await User.findById(req.user.id).select(
-      "name rollNumber department"
+      "name rollNumber department hasAttempted submittedAt"
     );
 
     const quiz = await Quiz.findOne({ status:"active" });
 
     if(!quiz){
-
       return res.json({
         profile:user,
         attempted:false,
         quizId:null
       });
-
     }
 
-    const submission = await Submission.findOne({
-      userId:req.user.id,
-      quizId:quiz._id
-    });
-
-    res.json({
+    // ✅ SINGLE RESPONSE ONLY
+    return res.json({
       profile:user,
-      attempted: !!submission,
+      attempted: user.hasAttempted,
       quizId:quiz._id
     });
 

@@ -5,6 +5,8 @@ const shuffle = require("../utils/shuffle");
 const PDFDocument = require("pdfkit");
 
 
+const User = require("../models/User");
+
 /* GET QUESTIONS */
 
 const getQuestions = async (req, res) => {
@@ -17,7 +19,7 @@ const getQuestions = async (req, res) => {
       return res.status(400).json({ message: "Quiz not started" });
     }
 
-    let questions = await Question.find({ quizId: quiz._id });
+   let questions = await Question.find({ quizId: quiz._id }).lean(); 
 
     questions = shuffle(questions);
 
@@ -45,17 +47,22 @@ const saveAnswer = async (req, res) => {
 
     const { quizId, questionId, selectedOptionId } = req.body;
 
-    let submission = await Submission.findOne({
-      userId: req.user.id,
-      quizId
-    });
+   let submission = await Submission.findOne({
+  userId: req.user.id,
+  quizId
+});
+
+    if(submission && submission.submittedAt){
+  return res.json({ message: "Already submitted" });
+}
 
     if (!submission) {
 
       submission = new Submission({
         userId: req.user.id,
         quizId,
-        answers: []
+        answers: [],
+        startedAt: new Date()
       });
 
     }
@@ -79,6 +86,8 @@ const saveAnswer = async (req, res) => {
 
     await submission.save();
 
+    
+
     res.json({ message: "Answer saved" });
 
   } catch (error) {
@@ -97,39 +106,59 @@ const submitQuiz = async (req, res) => {
 
   try {
 
-    const { quizId } = req.body;
+   let quizId = req.body.quizId;
+
+if (!quizId && typeof req.body === "string") {
+  try {
+    quizId = JSON.parse(req.body).quizId;
+  } catch (e) {}
+}
 
     const submission = await Submission.findOne({
       userId: req.user.id,
       quizId
     });
 
+    if(submission && submission.submittedAt){
+  return res.json({
+    message: "Already submitted",
+    score: submission.score
+  });
+}
+
     if (!submission) {
       return res.status(400).json({ message: "No answers submitted" });
     }
 
-    const questions = await Question.find({ quizId });
+    const questions = await Question.find({ quizId }).select("correctOptionId").lean();
 
-    let score = 0;
+   const answerMap = Object.create(null);
 
-    questions.forEach((question) => {
+submission.answers.forEach(a => {
+  answerMap[a.questionId] = a.selectedOptionId;
+});
 
-      const answer = submission.answers.find(
-        a => a.questionId === question._id.toString()
-      );
+let score = 0;
 
-      if (!answer) return;
-
-      if (answer.selectedOptionId === question.correctOptionId) {
-        score += 4;
-      }
-
-    });
+questions.forEach(q => {
+  if (answerMap[q._id.toString()] === q.correctOptionId) {
+    score++;
+  }
+});
 
     submission.score = score;
 
-    await submission.save();
+// ✅ FIX: set actual submission time
+submission.submittedAt = new Date();
 
+await submission.save();
+
+    // ✅ UPDATE USER ATTEMPT STATE
+await User.findByIdAndUpdate(req.user.id,{
+  hasAttempted:true,
+  submittedAt:new Date()
+});
+    
     res.json({
       message: "Quiz submitted successfully",
       score
@@ -196,7 +225,7 @@ const getResult = async (req, res) => {
       return res.status(404).json({ message: "Result not found" });
     }
 
-    const questions = await Question.find({ quizId });
+    const questions = await Question.find({ quizId }).lean();
 
     let correct = 0;
     let incorrect = 0;
@@ -247,12 +276,86 @@ const getLeaderboard = async (req, res) => {
 
     const { quizId } = req.params;
 
-    const leaderboard = await Submission.find({ quizId })
-      .populate("userId", "name rollNumber")
-      .sort({ score: -1 })
-      .limit(10);
+    const quiz = await Quiz.findById(quizId);
 
-    res.json(leaderboard);
+    if(!quiz){
+  return res.status(404).json({ message: "Quiz not found" });
+}
+
+// ✅ auto reset if quiz not active
+if(quiz && quiz.status !== "active"){
+  return res.json({
+    leaderboard: [],
+    yourRank: null,
+    totalUsers: 0
+  });
+}
+
+  const [users, submissions] = await Promise.all([
+  User.find().select("name rollNumber").lean(),
+  Submission.find({ quizId }).lean()
+]);
+
+// 3. map submissions
+const submissionMap = {};
+submissions.forEach(sub => {
+  if(sub.userId){
+  submissionMap[sub.userId.toString()] = sub;
+}
+});
+
+// 4. merge users + submissions
+const leaderboard = users.map(user => {
+
+  const sub = submissionMap[user._id.toString()];
+
+  let score = 0;
+  let timeTaken = 99999999;
+
+  if(sub){
+    score = sub.score;
+
+    if(sub.startedAt && sub.submittedAt){
+      timeTaken = Math.floor(
+        (sub.submittedAt - sub.startedAt) / 1000
+      );
+    }
+  }
+
+  return {
+    userId: user,
+    score,
+    timeTaken
+  };
+
+});
+
+// 5. sort
+leaderboard.sort((a,b)=>{
+  if(b.score !== a.score){
+    return b.score - a.score;
+  }
+  return a.timeTaken - b.timeTaken;
+});
+
+// 6. add rank
+const finalLeaderboard = leaderboard.map((item,index)=>({
+  ...item,
+  rank: index + 1
+}));
+
+   // ✅ find current user rank
+const userIndex = finalLeaderboard.findIndex(
+  item => item.userId._id.toString() === req.user.id
+);
+
+const yourRank = userIndex !== -1 ? userIndex + 1 : null;
+
+return res.json({
+  leaderboard : finalLeaderboard,
+  yourRank,
+  totalUsers: finalLeaderboard.length
+});
 
   } catch (error) {
 
@@ -280,7 +383,7 @@ const downloadResponseSheet = async (req,res)=>{
       return res.status(404).json({message:"Submission not found"});
     }
 
-    const questions = await Question.find({quizId});
+    const questions = await Question.find({quizId}).lean();
 
     const doc = new PDFDocument();
 

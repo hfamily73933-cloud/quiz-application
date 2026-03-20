@@ -23,13 +23,7 @@ export default function Home(){
 
         setProfile(dash.data.profile);
 
-        const submitted = localStorage.getItem(`quizSubmitted_${roll}`);
-
-        if(submitted === "true"){
-          setAttempted(true);
-        }else{
-          setAttempted(dash.data.attempted);
-        }
+        setAttempted(dash.data.attempted);
 
         setQuizId(dash.data.quizId);
 
