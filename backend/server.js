@@ -5,6 +5,14 @@ const { Server } = require("socket.io");
 const compression = require("compression");
 require("dotenv").config();
 
+if (!process.env.JWT_SECRET) {
+  console.error("❌ JWT_SECRET is missing in environment");
+  process.exit(1); // stop server if missing
+}
+
+// ✅ DEBUG LOG (ADD HERE)
+console.log("JWT_SECRET:", process.env.JWT_SECRET);
+
 const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/authRoutes");
