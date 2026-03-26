@@ -14,41 +14,36 @@ export default function Leaderboard(){
 
   const navigate = useNavigate();
 
- useEffect(()=>{
+  useEffect(()=>{
 
-  const loadData = async()=>{
-    try{
-      const [leaderRes, profileRes] = await Promise.all([
-        api.get(`/quiz/leaderboard/${quizId}`),
-        api.get("/auth/profile")
-      ]);
+    const loadData = async()=>{
+      try{
+        const [leaderRes, profileRes] = await Promise.all([
+          api.get(`/quiz/leaderboard/${quizId}`),
+          api.get("/auth/profile")
+        ]);
 
-      setLeaders(leaderRes.data.leaderboard);
-      setYourRank(leaderRes.data.yourRank);
-      setTotal(leaderRes.data.totalUsers);
+        setLeaders(leaderRes.data.leaderboard);
+        setYourRank(leaderRes.data.yourRank);
+        setTotal(leaderRes.data.totalUsers);
+        setCurrentUserId(profileRes.data._id);
 
-      setCurrentUserId(profileRes.data._id);
+      }catch(err){
+        console.log(err);
+      }finally{
+        setLoading(false);
+      }
+    };
 
-    }catch(err){
-      console.log(err);
-    }finally{
-      setLoading(false); // ✅ VERY IMPORTANT
-    }
-  };
+    loadData();
 
-  loadData();
-
-},[]);
-
+  },[]);
 
   const formatTime = (seconds)=>{
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}m ${s}s`;
-};
-
-
-  /* PREVENT BACK TO EXAM */
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}m ${s}s`;
+  };
 
   useEffect(()=>{
 
@@ -65,81 +60,111 @@ export default function Leaderboard(){
   },[]);
 
   if(loading){
-  return (
-    <p className="text-center mt-10">
-      Loading leaderboard...
-    </p>
-  );
-}
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        Loading leaderboard...
+      </div>
+    );
+  }
 
   return(
 
-    <div className="max-w-md mx-auto p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-200 via-cyan-100 to-indigo-200 p-4">
 
-      <div className="bg-white shadow rounded p-4">
+      {/* TOP BAR */}
+      <div className="flex items-center mb-6">
 
-  {/* TOP BAR */}
-  <div className="flex justify-between items-center mb-4">
-    
-    <button
-      onClick={()=>{
-        setLoading(true)
-        navigate("/home")
-      }}
-      className="bg-green-500 text-white px-3 py-1 rounded text-sm"
-    >
-      ← Home
-    </button>
+        <button
+          onClick={()=>{
+            setLoading(true);
+            navigate("/home");
+          }}
+          className="bg-white/70 px-3 py-1 rounded-full text-sm shadow
+          hover:bg-white transition"
+        >
+          ← Home
+        </button>
 
-    <h2 className="text-xl font-bold text-center flex-1">
-      Leaderboard
-    </h2>
+        <h2 className="text-2xl font-bold text-center flex-1 text-gray-800">
+          Leaderboard
+        </h2>
 
-    {/* empty space for alignment */}
-    <div className="w-16"></div>
+        <div className="w-16"></div>
+      </div>
 
-  </div>
+      {/* YOUR RANK */}
+      {yourRank !== null && (
+        <div className="text-center mb-6 text-lg font-semibold text-indigo-700">
+          You are ranked #{yourRank} out of {total}
+        </div>
+      )}
 
-        {yourRank !== null && (
-  <div className="text-center mb-3 font-semibold text-blue-600">
-    You are ranked #{yourRank} out of {total}
-  </div>
-)}
+      {/* LIST */}
+      <div className="space-y-4 max-w-md mx-auto">
 
-        {leaders.map((user,index)=>(
+        {leaders.map((user,index)=>{
 
-          <div
-            key={user.userId?._id || user.rank}
-            className={`flex justify-between border-b py-2 ${
-  user.userId?._id === currentUserId
-    ? "bg-blue-100 border-l-4 border-blue-500"
-    : ""
-} ${
-  index === 0 ? "text-yellow-500 font-bold" :
-  index === 1 ? "text-gray-500 font-semibold" :
-  index === 2 ? "text-orange-500 font-semibold" : ""
-}`}
-          >
+          const isYou = user.userId?._id === currentUserId;
 
-            <span className="font-medium">
-  #{user.rank} {user.userId?.name || "Unknown User"}
-{user.userId?._id === currentUserId && (
-  <span className="ml-2 text-blue-600 text-sm">(You)</span>
-)}
-</span>
+          const bgColors = [
+            "from-orange-300 to-red-300",
+            "from-yellow-300 to-orange-300",
+            "from-lime-300 to-yellow-300",
+            "from-pink-300 to-purple-300",
+            "from-indigo-300 to-blue-300"
+          ];
 
-            <span className="text-right">
-  <div>{user.score}</div>
-  <div className="text-xs text-gray-500">
-    {user.timeTaken === 99999999
-  ? "-"
-  : formatTime(user.timeTaken)}
-  </div>
-</span>
+          const gradient = bgColors[index] || "from-gray-200 to-gray-300";
 
-          </div>
+          return(
 
-        ))}
+            <div
+              key={user.userId?._id || user.rank}
+              className={`flex items-center justify-between p-4 rounded-full
+              bg-gradient-to-r ${gradient}
+              shadow-md transition-all duration-300
+              hover:scale-[1.02]
+              ${isYou ? "ring-2 ring-indigo-400" : ""}`}
+            >
+
+              {/* LEFT */}
+              <div className="flex items-center gap-3">
+
+                {/* Avatar */}
+                <div className="w-10 h-10 rounded-full bg-white/60 flex items-center justify-center">
+                  👤
+                </div>
+
+                {/* Name + Details */}
+                <div>
+                  <div className="font-semibold text-gray-900">
+                    {user.userId?.name || "Unknown"}
+                    {isYou && (
+                      <span className="ml-2 text-xs text-indigo-700">(You)</span>
+                    )}
+                  </div>
+
+                  {/* Score + Time */}
+                  <div className="text-sm font-medium text-gray-800">
+                    Score: {user.score} •{" "}
+                    {user.timeTaken === 99999999
+                      ? "-"
+                      : formatTime(user.timeTaken)}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* RIGHT (Rank) */}
+              <div className="text-xl font-bold text-gray-800">
+                {String(user.rank).padStart(2,"0")}
+              </div>
+
+            </div>
+
+          );
+
+        })}
 
       </div>
 
