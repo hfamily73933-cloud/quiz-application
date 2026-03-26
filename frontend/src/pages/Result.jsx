@@ -12,56 +12,52 @@ export default function Result(){
 
   const navigate = useNavigate();
 
+  const downloadSheet = async()=>{
 
-const downloadSheet = async()=>{
+    try{
 
-  try{
+      const res = await api.get(
+        `/quiz/response-sheet/${quizId}`,
+        { responseType:"blob" }
+      );
 
-    const res = await api.get(
-      `/quiz/response-sheet/${quizId}`,
-      { responseType:"blob" }
-    );
+      const url = window.URL.createObjectURL(new Blob([res.data]));
 
-    const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement("a");
 
-    const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download","response-sheet.pdf");
 
-    link.href = url;
-    link.setAttribute("download","response-sheet.pdf");
+      document.body.appendChild(link);
 
-    document.body.appendChild(link);
+      link.click();
 
-    link.click();
+      link.remove();
 
-    link.remove();
+    }catch(err){
+      console.log(err);
+    }
 
-  }catch(err){
-    console.log(err);
-  }
-
-};
+  };
 
   useEffect(()=>{
 
     const loadResult = async()=>{
-  try{
-    const res = await api.get(`/quiz/result/${quizId}`);
-    setResult(res.data);
-  }catch(err){
-    if(err.response?.status === 404){
-      setError("Please attempt the test");
-    }else{
-      setError("Something went wrong");
-    }
-  }
-};
+      try{
+        const res = await api.get(`/quiz/result/${quizId}`);
+        setResult(res.data);
+      }catch(err){
+        if(err.response?.status === 404){
+          setError("Please attempt the test");
+        }else{
+          setError("Something went wrong");
+        }
+      }
+    };
 
     loadResult();
 
   },[]);
-
-
-  /* PREVENT BACK TO EXAM */
 
   useEffect(()=>{
 
@@ -77,33 +73,48 @@ const downloadSheet = async()=>{
 
   },[]);
 
-
   if(error){
-  return (
-    <div className="text-center mt-10">
-      <p className="text-red-500 mb-4">
-        {error}
-      </p>
+    return (
+      <div className="min-h-screen flex items-center justify-center
+      bg-gradient-to-br from-blue-200 via-cyan-100 to-indigo-200">
+        
+        <div className="text-center p-6 rounded-xl shadow-lg
+        bg-gradient-to-br from-slate-700 to-slate-900 text-white">
 
-      <button
-        onClick={()=>navigate("/home")}
-        className="bg-green-500 text-white px-4 py-2 rounded"
-      >
-        Go to Home
-      </button>
-    </div>
-  );
-}
+          <p className="mb-4">{error}</p>
 
-if(!result){
-  return <p className="text-center mt-10">Loading result...</p>
-}
+          <button
+            onClick={()=>navigate("/home")}
+            className="bg-gradient-to-r from-green-400 to-green-500 text-white px-4 py-2 rounded
+            hover:shadow-md hover:-translate-y-0.5 transition-all"
+          >
+            Go to Home
+          </button>
+        </div>
+
+      </div>
+    );
+  }
+
+  if(!result){
+    return (
+      <div className="min-h-screen flex items-center justify-center
+      bg-gradient-to-br from-blue-200 via-cyan-100 to-indigo-200">
+        Loading result...
+      </div>
+    );
+  }
 
   return(
 
-    <div className="max-w-md mx-auto p-4">
+    <div className="min-h-screen flex items-center justify-center
+    bg-gradient-to-br from-blue-200 via-cyan-100 to-indigo-200 p-4">
 
-      <div className="bg-white shadow p-6 rounded text-center">
+      {/* CENTER CARD */}
+      <div className="p-6 rounded-2xl text-center w-full max-w-md
+      bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900
+      text-white shadow-xl transition-all duration-300
+      hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.02]">
 
         <h2 className="text-2xl font-bold mb-4">
           Quiz Result
@@ -113,43 +124,51 @@ if(!result){
           Your Score: <span className="font-bold">{result.score}</span>
         </p>
 
-        <div className="grid grid-cols-2 gap-3 text-sm mb-4">
+        <div className="grid grid-cols-2 gap-3 text-sm mb-5">
 
-          <div className="bg-gray-100 p-3 rounded">
+          <div className="bg-white/10 p-3 rounded-lg">
             Attempted
             <div className="font-bold">{result.attempted}</div>
           </div>
 
-          <div className="bg-gray-100 p-3 rounded">
+          <div className="bg-white/10 p-3 rounded-lg">
             Unattempted
             <div className="font-bold">{result.unattempted}</div>
           </div>
 
-          <div className="bg-green-100 p-3 rounded">
+          <div className="bg-green-400/20 p-3 rounded-lg">
             Correct
             <div className="font-bold">{result.correct}</div>
           </div>
 
-          <div className="bg-red-100 p-3 rounded">
+          <div className="bg-red-400/20 p-3 rounded-lg">
             Incorrect
             <div className="font-bold">{result.incorrect}</div>
           </div>
 
         </div>
 
+        {/* Buttons */}
+
         <button
-  onClick={downloadSheet}
-  className="mt-2 bg-purple-500 text-white p-2 rounded w-full"
->
-  Download Response Sheet
-</button>
+          onClick={downloadSheet}
+          className="mt-2 w-full py-2 rounded-lg font-medium text-white
+          bg-gradient-to-r from-purple-400 to-indigo-500
+          hover:from-purple-500 hover:to-indigo-600
+          transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:scale-95"
+        >
+          Download Response Sheet
+        </button>
 
         <button
           onClick={()=>{
             setLoading(true)
             navigate("/home")
           }}
-          className="mt-2 bg-green-500 text-white p-2 rounded w-full"
+          className="mt-3 w-full py-2 rounded-lg font-medium text-white
+          bg-gradient-to-r from-green-400 to-emerald-500
+          hover:from-green-500 hover:to-emerald-600
+          transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:scale-95"
         >
           {loading ? "Loading..." : "Back to Home"}
         </button>
@@ -159,7 +178,10 @@ if(!result){
             setLoading(true)
             navigate(`/leaderboard/${quizId}`)
           }}
-          className="mt-2 bg-blue-500 text-white p-2 rounded w-full"
+          className="mt-3 w-full py-2 rounded-lg font-medium text-white
+          bg-gradient-to-r from-blue-400 to-indigo-500
+          hover:from-blue-500 hover:to-indigo-600
+          transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:scale-95"
         >
           {loading ? "Loading..." : "View Leaderboard"}
         </button>
