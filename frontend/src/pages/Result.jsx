@@ -1,6 +1,7 @@
 import { useEffect,useState } from "react";
 import { useParams,useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import Loader from "../components/Loader";
 
 export default function Result(){
 
@@ -97,13 +98,8 @@ export default function Result(){
   }
 
   if(!result){
-    return (
-      <div className="min-h-screen flex items-center justify-center
-      bg-gradient-to-br from-blue-200 via-cyan-100 to-indigo-200">
-        Loading result...
-      </div>
-    );
-  }
+  return <Loader text="Loading result..." />;
+}
 
   return(
 
