@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import ProfileCard from "../components/ProfileCard";
+import Loader from "../components/Loader";
 
 export default function Home(){
 
@@ -64,12 +65,8 @@ export default function Home(){
   };
 
   if(!profile){
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        Loading...
-      </div>
-    );
-  }
+  return <Loader text="Loading dashboard..." />;
+}
 
   return(
 
