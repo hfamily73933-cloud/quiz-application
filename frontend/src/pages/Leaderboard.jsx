@@ -1,6 +1,7 @@
 import { useEffect,useState } from "react";
 import { useParams,useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import Loader from "../components/Loader";
 
 export default function Leaderboard(){
 
@@ -59,13 +60,9 @@ export default function Leaderboard(){
 
   },[]);
 
-  if(loading){
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        Loading leaderboard...
-      </div>
-    );
-  }
+ if(loading){
+  return <Loader text="Loading leaderboard..." />;
+}
 
   return(
 
