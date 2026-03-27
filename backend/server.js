@@ -63,6 +63,15 @@ app.use("/api/dashboard",dashboardRoutes);
 
 app.use("/api/admin",adminRoutes);
 
+
+
+
+// uptimerobot
+// ✅ HEALTH CHECK ROUTE (for UptimeRobot - no impact on app)
+app.get("/health",(req,res)=>{
+  res.status(200).json({ status: "ok" });
+});
+
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT,()=>{
