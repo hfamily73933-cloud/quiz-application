@@ -73,7 +73,7 @@ export default function Home(){
     <div
       className="relative min-h-screen flex items-center justify-center
       bg-no-repeat bg-center bg-contain bg-black p-4 overflow-hidden"
-      style={{ backgroundImage: "url('/bg-card.jpg')" }}
+      style={{ backgroundImage: "url('/bg-card.jpeg')" }}
     >
 
       {/* ⭐ STAR LAYER */}
