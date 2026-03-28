@@ -122,9 +122,9 @@ export default function Home(){
           <button
             onClick={()=>navigate(`/result/${quizId}`)}
             className="py-3 rounded-lg font-medium text-white
-            bg-gradient-to-r from-cyan-300/80 to-blue-400/80 backdrop-blur-sm border border-white/20
-            hover:from-cyan-300 hover:to-blue-500
-            transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
+bg-gradient-to-r from-teal-300/80 to-sky-400/80 backdrop-blur-sm border border-white/20
+hover:from-teal-400 hover:to-sky-500
+transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
           >
             View Result
           </button>
@@ -141,15 +141,17 @@ export default function Home(){
 
         </div>
 
-        <button
-          onClick={logout}
-          className="mt-6 w-full py-3 rounded-lg font-medium text-white
-          bg-red-400/80 backdrop-blur-sm border border-white/20
-          hover:bg-red-500 hover:shadow-md
-          transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
-        >
-          Logout
-        </button>
+        // ONLY THIS BUTTON UPDATED
+
+<button
+  onClick={logout}
+  className="mt-6 w-full py-3 rounded-lg font-medium text-white
+  bg-gradient-to-r from-indigo-400/80 to-blue-500/80 backdrop-blur-sm border border-white/20
+  hover:from-indigo-500 hover:to-blue-600 hover:shadow-md
+  transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
+>
+  Logout
+</button>
 
       </div>
 
