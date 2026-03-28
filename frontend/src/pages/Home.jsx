@@ -65,8 +65,8 @@ export default function Home(){
   };
 
   if(!profile){
-  return <Loader text="Loading dashboard..." />;
-}
+    return <Loader text="Loading dashboard..." />;
+  }
 
   return(
 
@@ -101,10 +101,30 @@ export default function Home(){
       {/* CONTENT */}
       <div className="relative z-10 w-full max-w-md px-4">
 
+        {/* 🔥 LOGO CARD (UPDATED) */}
+<div className="mb-6">
+
+  <div className="w-full rounded-xl overflow-hidden
+  bg-white/10 backdrop-blur-sm border border-white/20
+  shadow-md transition-all duration-300
+  hover:shadow-lg hover:-translate-y-1">
+
+    <img
+      src="/codex-logo.jpg"
+      alt="Logo"
+      className="w-full h-32 object-cover"
+    />
+
+  </div>
+
+</div>
+
+        {/* PROFILE CARD */}
         <div className="mb-6">
           <ProfileCard profile={profile}/>
         </div>
 
+        {/* START QUIZ */}
         <button
           disabled={attempted}
           onClick={()=>navigate("/exam")}
@@ -117,14 +137,15 @@ export default function Home(){
           {attempted ? "Quiz Already Submitted" : "Start Quiz"}
         </button>
 
+        {/* RESULT + LEADERBOARD */}
         <div className="grid grid-cols-2 gap-3 mt-4">
 
           <button
             onClick={()=>navigate(`/result/${quizId}`)}
             className="py-3 rounded-lg font-medium text-white
-bg-gradient-to-r from-teal-300/80 to-sky-400/80 backdrop-blur-sm border border-white/20
-hover:from-teal-400 hover:to-sky-500
-transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
+            bg-gradient-to-r from-teal-300/80 to-sky-400/80 backdrop-blur-sm border border-white/20
+            hover:from-teal-400 hover:to-sky-500
+            transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
           >
             View Result
           </button>
@@ -141,17 +162,16 @@ transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-
 
         </div>
 
-        // ONLY THIS BUTTON UPDATED
-
-<button
-  onClick={logout}
-  className="mt-6 w-full py-3 rounded-lg font-medium text-white
-  bg-gradient-to-r from-indigo-400/80 to-blue-500/80 backdrop-blur-sm border border-white/20
-  hover:from-indigo-500 hover:to-blue-600 hover:shadow-md
-  transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
->
-  Logout
-</button>
+        {/* LOGOUT */}
+        <button
+          onClick={logout}
+          className="mt-6 w-full py-3 rounded-lg font-medium text-white
+          bg-gradient-to-r from-indigo-400/80 to-blue-500/80 backdrop-blur-sm border border-white/20
+          hover:from-indigo-500 hover:to-blue-600 hover:shadow-md
+          transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
+        >
+          Logout
+        </button>
 
       </div>
 
