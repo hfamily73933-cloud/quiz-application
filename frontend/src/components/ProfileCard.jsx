@@ -17,7 +17,7 @@ export default function ProfileCard({ profile }) {
 
       {/* Roll */}
       <p className="text-sm mb-1 text-gray-800">
-        <span className="font-semibold text-gray-900">Roll:</span>{" "}
+        <span className="font-semibold text-gray-900">Sigmoid ID:</span>{" "}
         <span className="font-medium text-gray-900">
           {profile.rollNumber}
         </span>
@@ -25,7 +25,7 @@ export default function ProfileCard({ profile }) {
 
       {/* Department */}
       <p className="text-sm text-gray-800">
-        <span className="font-semibold text-gray-900">Department:</span>{" "}
+        <span className="font-semibold text-gray-900">Contact:</span>{" "}
         <span className="font-medium text-gray-900">
           {profile.department}
         </span>
