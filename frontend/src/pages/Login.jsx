@@ -92,7 +92,7 @@ export default function Login() {
         {/* Roll / Email */}
         <div className="relative mb-4">
           <input
-            placeholder={role === "admin" ? "Email" : "Roll Number"}
+            placeholder={role === "admin" ? "Email" : "Sigmoid ID"}
             className="w-full p-3 pl-10 rounded-lg border border-gray-300 bg-white/80 outline-none transition-all duration-200 hover:border-sky-400 hover:shadow-sm focus:ring-2 focus:ring-sky-400 focus:border-sky-400 focus:shadow-md focus:scale-[1.01]"
             value={rollNumber}
             onChange={(e) => setRollNumber(e.target.value)}
