@@ -84,14 +84,14 @@ export default function AddUser(){
 
         <input
           name="rollNumber"
-          placeholder="Roll Number"
+          placeholder="Sigmoid ID"
           className="border p-2 w-full mb-3"
           onChange={handleChange}
         />
 
         <input
           name="department"
-          placeholder="Department"
+          placeholder="Contact"
           className="border p-2 w-full mb-4"
           onChange={handleChange}
         />
