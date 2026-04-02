@@ -233,8 +233,16 @@ useEffect(() => {
       <div className="bg-white shadow p-4 rounded">
 
         <h2 className="font-semibold mb-4">
-          {index+1}. {question.question}
-        </h2>
+  {index+1}. {question.question}
+</h2>
+
+{question.image && (
+  <img
+    src={question.image}
+    alt="question"
+    className="w-full my-3 rounded border"
+  />
+)}
 
         {question.options.map(opt => {
 
