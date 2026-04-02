@@ -9,6 +9,8 @@ const questionSchema = new mongoose.Schema({
 
   question:String,
 
+  image:String, // ✅ NEW (SAFE)
+
   options:[
     {
       id:String,
