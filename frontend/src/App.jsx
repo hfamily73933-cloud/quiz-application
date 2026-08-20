@@ -6,11 +6,11 @@ import Exam from "./pages/Exam";
 import Result from "./pages/Result";
 import Leaderboard from "./pages/Leaderboard";
 
+import Demo from "./pages/Demo";
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminHome from "./pages/admin/AdminHome";
 import AddUser from "./pages/admin/AddUser";
-
 
 
 function App(){
@@ -31,12 +31,18 @@ function App(){
 
         <Route path="/leaderboard/:quizId" element={<Leaderboard />} />
 
+
+        {/* LIVE DEMO */}
+
+        <Route path="/demo" element={<Demo />} />
+
+
         <Route path="/admin/home" element={<AdminHome />} />
 
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
         <Route path="/admin/add-user" element={<AddUser />} />
-        
+
       </Routes>
 
     </BrowserRouter>
